@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Useful Links Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = { darkMode: 'class' }
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <nav
+        class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-4">
+            <a href="/" class="flex items-center gap-2">
+                <div class="bg-blue-600 p-1.5 rounded-lg"><i class="fa fa-link text-white text-sm"></i></div>
+                <h1 class="text-xl font-bold dark:text-white hidden sm:block">URL<span
+                        class="text-blue-600">.VAULT</span></h1>
+            </a>
+            <form action="/" method="GET" class="relative flex-1 max-w-md mx-4">
+                <input type="text" name="q" value="<%= q %>" placeholder="Search tools..."
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-full text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                <i class="fa fa-search absolute left-4 top-3 text-gray-400"></i>
+            </form>
+            <div class="flex items-center gap-2">
+                <button id="theme-toggle"
+                    class="w-10 h-10 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition">
+                    <i id="theme-icon" class="fa fa-moon"></i>
+                </button>
+                <a href="<%= admin ? '/admin' : '/login' %>"
+                    class="text-sm font-semibold text-white bg-blue-600 px-5 py-2 rounded-full hover:opacity-90">
+                    <%= admin ? 'Dashboard' : 'Login' %>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+        <aside class="w-full md:w-56 flex-shrink-0">
+            <div class="sticky top-24">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Categories</p>
+                <ul class="space-y-1">
+                    <% categories.forEach(cat=> { %>
+                        <li><a href="#<%= cat.replace(/\s+/g, '-').toLowerCase() %>"
+                                class="block px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                                <%= cat %>
+                            </a></li>
+                        <% }) %>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="flex-1">
+            <% categories.forEach(cat=> { %>
+                <section id="<%= cat.replace(/\s+/g, '-').toLowerCase() %>" class="mb-12 scroll-mt-24">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 dark:text-white">
+                        <%= cat %>
+                    </h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <% entries.filter(e=> e.category === cat).forEach(item => { %>
+                            <div
+                                class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all">
+                                <div class="flex justify-between mb-3">
+                                    <h3 class="font-bold text-lg dark:text-white">
+                                        <%= item.name %>
+                                    </h3>
+                                    <a href="<%= item.url %>" target="_blank"
+                                        class="text-blue-500 hover:text-blue-600"><i
+                                            class="fa fa-external-link-alt"></i></a>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                                    <%= item.description %>
+                                </p>
+                                <a href="<%= item.url %>" target="_blank"
+                                    class="text-xs font-bold text-blue-600 uppercase tracking-wider">Visit Site <i
+                                        class="fa fa-arrow-right ml-1"></i></a>
+                            </div>
+                            <% }) %>
+                    </div>
+                </section>
+                <% }) %>
+        </main>
+    </div>
+
+    <script>
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        function updateIcon() {
+            if (document.documentElement.classList.contains('dark')) {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+        updateIcon();
+
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcon();
+        });
+    </script>
+</body>
+
+</html>
