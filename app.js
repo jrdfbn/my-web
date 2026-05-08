@@ -2,12 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
 
-// SETTING PATH VIEW (BIAR GAK 403)
+// 1. SETTING PATH & VIEW ENGINE
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -15,24 +16,34 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+// 2. DATABASE CONNECTION & SESSION (PRO-LEVEL)
+const mongoUrl = process.env.MONGODB_URI;
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "vault-secret",
+    secret: process.env.SESSION_SECRET || "vault-secret-123",
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 },
+    store: MongoStore.create({
+      mongoUrl: mongoUrl,
+      ttl: 14 * 24 * 60 * 60, // Session awet 14 hari meski server mati
+    }),
+    cookie: {
+      maxAge: 14 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production", // true jika https
+      sameSite: "lax",
+    },
   }),
 );
 
-// DATABASE CONNECTION (SERVERLESS FRIENDLY)
+// Connect Mongoose
 let isConnected = false;
 const connectDB = async () => {
   if (isConnected) return;
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
-    });
+    await mongoose.connect(mongoUrl);
     isConnected = true;
+    console.log("MongoDB Connected via Mongoose");
 
     // Auto-seed admin
     const User =
@@ -73,7 +84,7 @@ const User =
     new mongoose.Schema({ username: String, password: { type: String } }),
   );
 
-// MIDDLEWARE UNTUK CONNECT DB SETIAP REQUEST
+// MIDDLEWARE
 app.use(async (req, res, next) => {
   await connectDB();
   next();
@@ -109,7 +120,7 @@ app.post("/login", async (req, res) => {
     req.session.adminId = user._id;
     res.redirect("/admin");
   } else {
-    res.render("login", { error: "Gagal Login" });
+    res.render("login", { error: "Username/Password Salah" });
   }
 });
 
@@ -151,10 +162,10 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-// UNTUK VERCEL
+// EXPORT UNTUK VERCEL
 module.exports = app;
 
 // UNTUK LOKAL
 if (process.env.NODE_ENV !== "production") {
-  app.listen(3000, () => console.log("http://localhost:3000"));
+  app.listen(3000, () => console.log("Local: http://localhost:3000"));
 }
