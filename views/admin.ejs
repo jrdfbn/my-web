@@ -3,66 +3,50 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body class="bg-gray-100 p-4 md:p-8">
     <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold">Admin Panel</h1>
-            <div class="flex gap-2">
-                <a href="/" class="bg-gray-200 px-4 py-2 rounded-lg text-sm">Site</a>
-                <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm">Logout</a>
-            </div>
+        <div class="flex justify-between mb-8">
+            <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+            <div class="flex gap-2"><a href="/" class="bg-gray-200 px-4 py-2 rounded">Site</a><a href="/logout"
+                    class="bg-red-500 text-white px-4 py-2 rounded">Logout</a></div>
         </div>
-
-        <!-- Add Form -->
         <form action="/admin/add" method="POST"
             class="bg-white p-6 rounded-2xl shadow-sm mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input type="text" name="category" placeholder="Category" required class="border p-2 rounded-lg text-sm">
-            <input type="text" name="name" placeholder="Name" required class="border p-2 rounded-lg text-sm">
-            <input type="text" name="url" placeholder="URL" required class="border p-2 rounded-lg text-sm">
-            <input type="text" name="description" placeholder="Description" required
-                class="border p-2 rounded-lg text-sm">
-            <button class="bg-blue-600 text-white rounded-lg p-2 md:col-span-4 font-bold">+ Add New Link</button>
+            <input type="text" name="category" placeholder="Category" required class="border p-2 rounded">
+            <input type="text" name="name" placeholder="Name" required class="border p-2 rounded">
+            <input type="text" name="url" placeholder="URL" required class="border p-2 rounded">
+            <input type="text" name="description" placeholder="Description" required class="border p-2 rounded">
+            <button class="bg-blue-600 text-white rounded font-bold p-2 md:col-span-4">+ Add Link</button>
         </form>
-
-        <!-- Manage List -->
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <h2 class="font-bold">Manage Entries</h2>
-                <form action="/admin" method="GET" class="relative">
-                    <input type="text" name="q" value="<%= q %>" placeholder="Search admin..."
-                        class="pl-8 pr-4 py-1 border rounded-lg text-sm">
-                    <i class="fa fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
-                </form>
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 class="font-bold">Manage Links</h2>
+                <form action="/admin" method="GET" class="relative"><input type="text" name="q" value="<%= q %>"
+                        placeholder="Search..." class="pl-8 pr-4 py-1 border rounded text-sm"><i
+                        class="fa fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i></form>
             </div>
             <table class="w-full text-left">
-                <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="p-4 text-sm">Name</th>
-                        <th class="p-4 text-sm">Category</th>
-                        <th class="p-4 text-sm">Actions</th>
+                        <th class="p-4">Name</th>
+                        <th class="p-4 text-actions">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     <% entries.forEach(item=> { %>
-                        <tr class="hover:bg-gray-50 transition">
+                        <tr class="border-t hover:bg-gray-50">
                             <td class="p-4 font-bold text-sm">
                                 <%= item.name %>
                             </td>
-                            <td class="p-4 text-xs text-gray-500 uppercase">
-                                <%= item.category %>
-                            </td>
-                            <td class="p-4 flex gap-4 text-sm">
-                                <button onclick='editModal(<%- JSON.stringify(item) %>)'
-                                    class="text-blue-600 hover:underline">Edit</button>
-                                <form action="/admin/delete/<%= item._id %>" method="POST"
-                                    onsubmit="return confirm('Hapus?')">
-                                    <button class="text-red-500 hover:underline">Delete</button>
-                                </form>
+                            <td class="p-4 flex gap-4 text-sm"><button onclick='editModal(<%- JSON.stringify(item) %>)'
+                                    class="text-blue-600">Edit</button>
+                                <form action="/admin/delete/<%= item._id %>" method="POST"><button
+                                        class="text-red-500">Delete</button></form>
                             </td>
                         </tr>
                         <% }) %>
@@ -70,35 +54,21 @@
             </table>
         </div>
     </div>
-
-    <!-- Edit Modal -->
-    <div id="modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-[100]">
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4">
         <form action="/admin/edit" method="POST"
             class="bg-white p-6 rounded-2xl w-full max-w-md flex flex-col gap-4 shadow-2xl">
-            <h3 class="text-xl font-bold">Edit Entry</h3>
-            <input type="hidden" name="id" id="e-id">
-            <input type="text" name="category" id="e-cat" class="border p-3 rounded-lg" placeholder="Category">
-            <input type="text" name="name" id="e-name" class="border p-3 rounded-lg" placeholder="Name">
-            <input type="text" name="url" id="e-url" class="border p-3 rounded-lg" placeholder="URL">
-            <textarea name="description" id="e-desc" class="border p-3 rounded-lg h-32"
-                placeholder="Description"></textarea>
-            <div class="flex justify-end gap-2">
-                <button type="button" onclick="document.getElementById('modal').classList.add('hidden')"
-                    class="p-3 text-gray-500">Cancel</button>
-                <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold">Save Changes</button>
-            </div>
+            <h3 class="text-xl font-bold">Edit Link</h3><input type="hidden" name="id" id="e-id">
+            <input type="text" name="category" id="e-cat" class="border p-2 rounded" placeholder="Category">
+            <input type="text" name="name" id="e-name" class="border p-2 rounded" placeholder="Name">
+            <input type="text" name="url" id="e-url" class="border p-2 rounded" placeholder="URL">
+            <textarea name="description" id="e-desc" class="border p-2 rounded" placeholder="Description"></textarea>
+            <div class="flex justify-end gap-2"><button type="button"
+                    onclick="document.getElementById('modal').classList.add('hidden')"
+                    class="p-2 text-gray-500">Cancel</button><button
+                    class="bg-blue-600 text-white px-4 py-2 rounded">Save</button></div>
         </form>
     </div>
-    <script>
-        function editModal(data) {
-            document.getElementById('e-id').value = data._id;
-            document.getElementById('e-cat').value = data.category;
-            document.getElementById('e-name').value = data.name;
-            document.getElementById('e-url').value = data.url;
-            document.getElementById('e-desc').value = data.description;
-            document.getElementById('modal').classList.remove('hidden');
-        }
-    </script>
+    <script>function editModal(data) { document.getElementById('e-id').value = data._id; document.getElementById('e-cat').value = data.category; document.getElementById('e-name').value = data.name; document.getElementById('e-url').value = data.url; document.getElementById('e-desc').value = data.description; document.getElementById('modal').classList.remove('hidden'); }</script>
 </body>
 
 </html>

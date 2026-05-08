@@ -3,37 +3,25 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login Admin</title>
+    <title>Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
-        <div class="text-center mb-8">
-            <div class="bg-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <h1 class="text-2xl font-bold">Welcome Back</h1>
-            <p class="text-gray-400 text-sm">Login to manage your vault</p>
-        </div>
+    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
+        <h1 class="text-2xl font-bold mb-6">Login Admin</h1>
         <% if(error) { %>
-            <p class="bg-red-50 text-red-500 p-3 rounded-lg text-xs mb-4 text-center">
+            <p class="text-red-500 mb-4">
                 <%= error %>
             </p>
             <% } %>
                 <form action="/login" method="POST" class="space-y-4">
                     <input type="text" name="username" placeholder="Username" required
-                        class="w-full border-gray-200 border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        class="w-full border p-3 rounded-xl">
                     <input type="password" name="password" placeholder="Password" required
-                        class="w-full border-gray-200 border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    <button
-                        class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">Login</button>
+                        class="w-full border p-3 rounded-xl">
+                    <button class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Login</button>
                 </form>
-                <a href="/" class="block text-center mt-6 text-sm text-gray-400 hover:text-blue-600 transition">← Back
-                    to Gallery</a>
     </div>
 </body>
 
