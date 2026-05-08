@@ -3,24 +3,20 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
+const path = require("path");
 
 const app = express();
 
-// Database Connection & Auto-Create Admin
+// Database Connection
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(async () => {
-    console.log("Connected to MongoDB");
-    const adminExists = await User.findOne({ username: "admin" });
-    if (!adminExists) {
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      await User.create({ username: "admin", password: hashedPassword });
-      console.log("Admin account created: admin / admin123");
-    }
+    console.log("DB Connected");
+    await seedAdmin();
   })
   .catch((err) => console.log(err));
 
-// Schema
+// Schemas
 const Entry = mongoose.model(
   "Entry",
   new mongoose.Schema({
@@ -34,16 +30,26 @@ const User = mongoose.model(
   "User",
   new mongoose.Schema({
     username: { type: String, unique: true },
-    password: String,
+    password: { type: String },
   }),
 );
 
+async function seedAdmin() {
+  const hash = await bcrypt.hash("admin123", 10);
+  await User.findOneAndUpdate(
+    { username: "admin" },
+    { password: hash },
+    { upsert: true },
+  );
+}
+
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "secret-key",
+    secret: process.env.SESSION_SECRET || "vault-secret",
     resave: false,
     saveUninitialized: false,
   }),
@@ -74,7 +80,7 @@ app.post("/login", async (req, res) => {
     req.session.adminId = user._id;
     res.redirect("/admin");
   } else {
-    res.render("login", { error: "Salah!" });
+    res.render("login", { error: "Username/Password Salah" });
   }
 });
 
@@ -116,5 +122,11 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Running on ${PORT}`));
+// Export for Vercel
+module.exports = app;
+
+// Listen for Local Testing
+if (process.env.NODE_ENV !== "production") {
+  const PORT = 3000;
+  app.listen(PORT, () => console.log(`Local: http://localhost:${PORT}`));
+}
