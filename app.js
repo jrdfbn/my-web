@@ -8,13 +8,39 @@ const path = require("path");
 const app = express();
 
 // Database Connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(async () => {
+// Hapus kode koneksi database lama, ganti dengan ini:
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb) return cachedDb;
+
+  // Pastikan MONGODB_URI tidak kosong
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI tidak ditemukan di Environment Variables");
+  }
+
+  try {
+    const db = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // Maksimal nunggu 5 detik
+    });
+    cachedDb = db;
     console.log("DB Connected");
-    await seedAdmin();
-  })
-  .catch((err) => console.log(err));
+    return db;
+  } catch (err) {
+    console.error("DB Connection Error:", err);
+    throw err;
+  }
+}
+
+// Middleware untuk memastikan DB connect di setiap request
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    res.status(500).send("Gagal terhubung ke Database. Cek logs!");
+  }
+});
 
 // Schemas
 const Entry = mongoose.model(
